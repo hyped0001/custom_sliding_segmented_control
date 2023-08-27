@@ -71,13 +71,19 @@ class CustomSlidingSegmentedControl<T> extends StatefulWidget {
     this.isStretch = false,
     this.fromMax = false,
     this.clipBehavior = Clip.none,
-    @Deprecated('use CustomSegmentSettings') this.splashColor = Colors.transparent,
-    @Deprecated('use CustomSegmentSettings') this.splashFactory = NoSplash.splashFactory,
-    @Deprecated('use CustomSegmentSettings') this.highlightColor = Colors.transparent,
+    @Deprecated('use CustomSegmentSettings')
+    this.splashColor = Colors.transparent,
+    @Deprecated('use CustomSegmentSettings')
+    this.splashFactory = NoSplash.splashFactory,
+    @Deprecated('use CustomSegmentSettings')
+    this.highlightColor = Colors.transparent,
     this.height = 40,
     this.controller,
     this.customSegmentSettings,
     this.onHoverSegment,
+    this.segmentWidth,
+    this.segmentHeight,
+    this.segmentColor,
   })  : assert(children.length != 0),
         super(key: key);
   final BoxDecoration? decoration;
@@ -90,6 +96,10 @@ class CustomSlidingSegmentedControl<T> extends StatefulWidget {
   final double padding;
   final double? fixedWidth;
   final Map<T, Widget> children;
+  final double? segmentWidth;
+  final double? segmentHeight;
+  final Color? segmentColor;
+
   /// true if the switch control is disabled
   /// defalut to false
   final bool isDisabled;
@@ -112,10 +122,12 @@ class CustomSlidingSegmentedControl<T> extends StatefulWidget {
   final CustomSegmentSettings? customSegmentSettings;
 
   @override
-  _CustomSlidingSegmentedControlState<T> createState() => _CustomSlidingSegmentedControlState();
+  _CustomSlidingSegmentedControlState<T> createState() =>
+      _CustomSlidingSegmentedControlState();
 }
 
-class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmentedControl<T>> {
+class _CustomSlidingSegmentedControlState<T>
+    extends State<CustomSlidingSegmentedControl<T>> {
   T? current;
   double? height;
   double offset = 0.0;
@@ -143,7 +155,8 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
 
     final changeInitial = oldWidget.initialValue != widget.initialValue;
 
-    final changeChildrenLength = oldWidget.children.length != widget.children.length;
+    final changeChildrenLength =
+        oldWidget.children.length != widget.children.length;
 
     if (changeInitial || changeChildrenLength) {
       hasTouch = true;
@@ -207,7 +220,8 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
   }
 
   void _controllerTap() {
-    if (widget.controller!.value == null || current == widget.controller!.value) {
+    if (widget.controller!.value == null ||
+        current == widget.controller!.value) {
       return;
     }
 
@@ -226,7 +240,7 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
   void onTapItem(MapEntry<T?, Widget> item) {
     // when the switch control is disabled
     // do nothing on tap item
-    if(widget.isDisabled){
+    if (widget.isDisabled) {
       return;
     }
     if (!hasTouch) {
@@ -253,9 +267,9 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
       hoverColor: widget.customSegmentSettings?.hoverColor,
       overlayColor: widget.customSegmentSettings?.overlayColor,
       radius: widget.customSegmentSettings?.radius,
-      splashColor: widget.customSegmentSettings?.splashColor ?? widget.splashColor,
-      splashFactory: widget.customSegmentSettings?.splashFactory ?? widget.splashFactory,
-      highlightColor: widget.customSegmentSettings?.highlightColor ?? widget.highlightColor,
+      splashColor: widget.customSegmentSettings?.splashColor,
+      splashFactory: widget.customSegmentSettings?.splashFactory,
+      highlightColor: widget.customSegmentSettings?.highlightColor,
       borderRadius: widget.customSegmentSettings?.borderRadius,
       child: Container(
         height: widget.height,
@@ -284,17 +298,35 @@ class _CustomSlidingSegmentedControlState<T> extends State<CustomSlidingSegmente
           ),
           Row(
             children: [
-              for (final item in widget.children.entries)
+              for (int i = 0; i < widget.children.entries.length; i++) ...[
                 MeasureSize(
                   onChange: (value) {
                     calculateSize(
                       size: value,
-                      item: item,
+                      item: widget.children.entries.elementAt(i),
                       isCacheEnabled: true,
                     );
                   },
-                  child: widget.isStretch ? Expanded(child: _segmentItem(item)) : _segmentItem(item),
+                  child: widget.isStretch
+                      ? Expanded(
+                          child: _segmentItem(
+                            widget.children.entries.elementAt(i),
+                          ),
+                        )
+                      : _segmentItem(widget.children.entries.elementAt(i)),
                 ),
+                if (widget.segmentWidth != null &&
+                    widget.segmentHeight != null &&
+                    widget.segmentColor != null)
+                  if (i < widget.children.entries.length - 1 &&
+                      widget.children.entries.elementAt(i).key != current &&
+                      widget.children.entries.elementAt(i + 1).key != current)
+                    Container(
+                      width: 1,
+                      height: 20,
+                      color: const Color(0xffF7EFF3),
+                    ),
+              ],
             ],
           ),
         ],
