@@ -322,9 +322,9 @@ class _CustomSlidingSegmentedControlState<T>
                       widget.children.entries.elementAt(i).key != current &&
                       widget.children.entries.elementAt(i + 1).key != current)
                     Container(
-                      width: 1,
-                      height: 20,
-                      color: const Color(0xffF7EFF3),
+                      width: widget.segmentWidth,
+                      height: widget.segmentHeight,
+                      color: widget.segmentColor,
                     ),
               ],
             ],
